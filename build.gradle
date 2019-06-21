@@ -19,6 +19,12 @@ buildscript {
     repositories {
         jcenter()
     }
+    dependencies {
+        classpath 'org.apache.openjpa:openjpa-all:2.2.0'
+        classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
+
+    }
+
 }
 
 plugins {
@@ -31,10 +37,10 @@ group 'org.apache.fineract.cn'
 version '0.1.0-BUILD-SNAPSHOT'
 
 ext.versions = [
-        springcontext        : '4.3.3.RELEASE',
-        springboot           : '1.4.1.RELEASE',
-        findbugs             : '3.0.1',
-        frameworklang        : '0.1.0-BUILD-SNAPSHOT'
+        springcontext: '4.3.3.RELEASE',
+        springboot   : '1.4.1.RELEASE',
+        findbugs     : '3.0.1',
+        frameworklang: '0.1.0-BUILD-SNAPSHOT'
 ]
 
 apply plugin: 'java'
@@ -42,10 +48,12 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'license'
+apply plugin: 'openjpa'
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+
 }
 
 repositories {
@@ -53,6 +61,7 @@ repositories {
     mavenLocal()
     maven { url 'https://mifos.jfrog.io/mifos/libs-snapshot/' }
 }
+
 
 dependencies {
     compile(
@@ -62,7 +71,8 @@ dependencies {
             [group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: versions.springboot],
             [group: 'com.jolbox', name: 'bonecp', version: '0.8.0.RELEASE'],
             [group: 'org.flywaydb', name: 'flyway-core', version: '4.0.1'],
-            [group: 'org.postgresql', name: 'postgresql', version: '42.2.5']
+            [group: 'org.postgresql', name: 'postgresql', version: '42.2.5'],
+            [group: 'org.apache.openjpa', name: 'openjpa-all', version: '2.2.0']
     )
     testCompile(
             [group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springboot]
@@ -94,11 +104,11 @@ artifactory {
         }
 
         defaults {
-            publications ('postgresqlPublication')
+            publications('postgresqlPublication')
         }
     }
 }
-artifactoryPublish.dependsOn('clean','publishToMavenLocal')
+artifactoryPublish.dependsOn('clean', 'publishToMavenLocal')
 
 license {
     header rootProject.file('HEADER')
@@ -119,4 +129,13 @@ rat {
             "gradlew.bat",
             "README.md"
     ]
+}
+
+
+openjpa {
+    files = fileTree(sourceSets.main.output.classesDir).matching {
+        include 'org/apache/fineract/cn/**/repository/*.class'
+    }
+    enforcePropertyRestrictions = false
+    persistenceXmlFile = file('org/apache/fineract/cn/postgresql/repository/persistence.xml')
 }

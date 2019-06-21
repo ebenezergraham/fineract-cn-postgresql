@@ -35,7 +35,7 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -64,16 +64,16 @@ public class PostgreSQLJavaConfiguration {
   }
 
   @Bean
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory(final DataSource dataSource) {
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory(@SuppressWarnings("SpringJavaAutowiringInspection") final DataSource dataSource) {
     final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
     em.setPersistenceUnitName("metaPU");
+    em.setJtaDataSource(dataSource);
     em.setDataSource(dataSource);
     em.setPackagesToScan("org.apache.fineract.cn.**.repository");
-
-    final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-    em.setJpaVendorAdapter(vendorAdapter);
+    
+    final JpaVendorAdapter jpaVendorAdapter = new OpenJpaVendorAdapter();
+    em.setJpaVendorAdapter(jpaVendorAdapter);
     em.setJpaProperties(additionalProperties());
-
     return em;
   }
 
@@ -133,7 +133,6 @@ public class PostgreSQLJavaConfiguration {
 
   private Properties additionalProperties() {
     final Properties properties = new Properties();
-    properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
     return properties;
   }
 }
