@@ -26,8 +26,11 @@ import org.apache.fineract.cn.lang.config.EnableApplicationName;
 import org.apache.fineract.cn.postgresql.util.PostgreSQLConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -35,12 +38,16 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.jta.JtaTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 @SuppressWarnings("WeakerAccess")
@@ -48,14 +55,16 @@ import java.util.Properties;
 @ConditionalOnProperty(prefix = "postgresql", name = "enabled", matchIfMissing = true)
 @EnableTransactionManagement
 @EnableApplicationName
-public class PostgreSQLJavaConfiguration {
+public class PostgreSQLJavaConfiguration  extends JpaBaseConfiguration {
 
   private final Environment env;
-
+  
   @Autowired
-  public PostgreSQLJavaConfiguration(final Environment env) {
-    super();
+  protected PostgreSQLJavaConfiguration(final Environment env,DataSource dataSource, OpenJpaProperties properties,
+                          ObjectProvider<JtaTransactionManager> jtaTransactionManager) {
+    super(dataSource, properties, jtaTransactionManager);
     this.env = env;
+  
   }
 
   @Bean(name = PostgreSQLConstants.LOGGER_NAME)
@@ -134,5 +143,15 @@ public class PostgreSQLJavaConfiguration {
   private Properties additionalProperties() {
     final Properties properties = new Properties();
     return properties;
+  }
+  
+  @Override
+  protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
+    return new OpenJpaVendorAdapter();
+  }
+  
+  @Override
+  protected Map<String, Object> getVendorProperties() {
+    return new HashMap<>(0);
   }
 }

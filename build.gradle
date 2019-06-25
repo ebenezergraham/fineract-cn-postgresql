@@ -21,8 +21,6 @@ buildscript {
     }
     dependencies {
         classpath 'org.apache.openjpa:openjpa-all:2.2.0'
-        classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
-
     }
 
 }
@@ -48,7 +46,6 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'license'
-apply plugin: 'openjpa'
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -129,13 +126,4 @@ rat {
             "gradlew.bat",
             "README.md"
     ]
-}
-
-
-openjpa {
-    files = fileTree(sourceSets.main.output.classesDir).matching {
-        include 'org/apache/fineract/cn/**/repository/*.class'
-    }
-    enforcePropertyRestrictions = false
-    persistenceXmlFile = file('org/apache/fineract/cn/postgresql/repository/persistence.xml')
 }
