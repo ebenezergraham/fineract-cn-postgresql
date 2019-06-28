@@ -19,10 +19,6 @@ buildscript {
     repositories {
         jcenter()
     }
-    dependencies {
-        classpath 'org.apache.openjpa:openjpa-all:2.2.0'
-    }
-
 }
 
 plugins {
@@ -47,6 +43,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'license'
 
+
 tasks.withType(JavaCompile) {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -59,7 +56,6 @@ repositories {
     maven { url 'https://mifos.jfrog.io/mifos/libs-snapshot/' }
 }
 
-
 dependencies {
     compile(
             [group: 'org.springframework', name: 'spring-context', version: versions.springcontext],
@@ -69,7 +65,7 @@ dependencies {
             [group: 'com.jolbox', name: 'bonecp', version: '0.8.0.RELEASE'],
             [group: 'org.flywaydb', name: 'flyway-core', version: '4.0.1'],
             [group: 'org.postgresql', name: 'postgresql', version: '42.2.5'],
-            [group: 'org.apache.openjpa', name: 'openjpa-all', version: '2.2.0']
+            [group: 'org.apache.openjpa', name: 'openjpa', version: '3.1.0']
     )
     testCompile(
             [group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springboot]
