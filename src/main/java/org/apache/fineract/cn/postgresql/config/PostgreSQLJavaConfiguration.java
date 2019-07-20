@@ -33,6 +33,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -53,8 +54,8 @@ import java.util.Properties;
 @SuppressWarnings("WeakerAccess")
 @Configuration
 @ConditionalOnProperty(prefix = "postgresql", name = "enabled", matchIfMissing = true)
-@EnableTransactionManagement
 @EnableApplicationName
+@Import(OpenJpaConfiguration.class)
 public class PostgreSQLJavaConfiguration {
 	
 	private final Environment env;
@@ -69,31 +70,6 @@ public class PostgreSQLJavaConfiguration {
 	@Bean(name = PostgreSQLConstants.LOGGER_NAME)
 	public Logger logger() {
 		return LoggerFactory.getLogger(PostgreSQLConstants.LOGGER_NAME);
-	}
-	
-	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(@SuppressWarnings("SpringJavaAutowiringInspection") final DataSource dataSource) {
-		final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-		em.setPersistenceUnitName("metaPU");
-		em.setDataSource(dataSource);
-		em.setPackagesToScan("org.apache.fineract.cn.**.repository");
-		
-		final JpaVendorAdapter jpaVendorAdapter = new OpenJpaVendorAdapter();
-		em.setJpaVendorAdapter(jpaVendorAdapter);
-		em.setJpaProperties(additionalProperties());
-		return em;
-	}
-	
-	@Bean
-	public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
-		final JpaTransactionManager transactionManager = new JpaTransactionManager();
-		transactionManager.setEntityManagerFactory(emf);
-		return transactionManager;
-	}
-	
-	@Bean
-	public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
-		return new PersistenceExceptionTranslationPostProcessor();
 	}
 	
 	@Bean
@@ -136,14 +112,5 @@ public class PostgreSQLJavaConfiguration {
 		driverProperties.setProperty("useServerPrepStmts", "false");
 		boneCPDataSource.setDriverProperties(driverProperties);
 		return new MetaDataSourceWrapper(boneCPDataSource);
-	}
-	
-	private Properties additionalProperties() {
-		final Properties properties = new Properties();
-		properties.setProperty("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.PostgresDictionary");
-		properties.setProperty("openjpa.RuntimeUnenhancedClasses", "supported"); // set to unsupported for production
-		properties.setProperty("openjpa.DynamicEnhancementAgent", "true");
-		properties.setProperty("openjpa.Log", "DefaultLevel=TRACE, Tool=INFO, SQL=TRACE, Runtime=TRACE"); // set to unsupported for production
-		return properties;
 	}
 }
